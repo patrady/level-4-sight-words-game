@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Level 4 Sight Words Matching Game - Spelling Success</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    animation: {
+                        'bounce-slow': 'bounce 2s infinite',
+                        'pulse-glow': 'pulseGlow 2s ease-in-out infinite',
+                        'score-pop': 'scorePop 0.5s ease-out',
+                        'card-matched': 'cardMatched 0.6s ease-out',
+                        'grow-text': 'growText 1.5s ease-out forwards',
+                        'confetti-fall': 'confettiFall 3s linear infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                        'fade-in': 'fadeIn 0.5s ease-out',
+                    },
+                    keyframes: {
+                        pulseGlow: {
+                            '0%, 100%': { boxShadow: '0 0 5px rgba(59,130,246,0.5)' },
+                            '50%': { boxShadow: '0 0 20px rgba(59,130,246,0.8), 0 0 40px rgba(59,130,246,0.4)' },
+                        },
+                        scorePop: {
+                            '0%': { transform: 'scale(1)' },
+                            '50%': { transform: 'scale(1.4)' },
+                            '100%': { transform: 'scale(1)' },
+                        },
+                        cardMatched: {
+                            '0%': { transform: 'scale(1) rotate(0deg)' },
+                            '25%': { transform: 'scale(1.1) rotate(5deg)' },
+                            '50%': { transform: 'scale(1.1) rotate(-5deg)' },
+                            '75%': { transform: 'scale(1.05) rotate(2deg)' },
+                            '100%': { transform: 'scale(1) rotate(0deg)' },
+                        },
+                        growText: {
+                            '0%': { transform: 'scale(0.3)', opacity: '0' },
+                            '50%': { opacity: '1' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(30px)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' },
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+        }
+        .card-inner.flipped {
+            transform: rotateY(180deg);
+        }
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .card-back {
+            transform: rotateY(180deg);
+        }
+        .card-container {
+            perspective: 1000px;
+        }
+        .card-container:hover .card-inner:not(.flipped):not(.matched) {
+            transform: scale(1.05);
+        }
+        .card-container:active .card-inner:not(.flipped):not(.matched) {
+            transform: scale(0.95);
+        }
+        .matched .card-inner {
+            animation: cardMatched 0.6s ease-out;
+        }
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .volume-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-purple-600 via-blue-500 to-cyan-400 text-white">
+
+    <!-- Header -->
+    <header class="sticky top-0 z-50 bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+                    <span class="bg-clip-text text-transparent bg-gradient-to-r from-yellow-300 via-pink-300 to-cyan-300">Level 4</span>
+                    <span class="text-white/90 text-lg md:text-xl ml-2">Sight Words</span>
+                </h1>
+            </div>
+            <nav class="flex items-center gap-2 md:gap-4">
+                <a href="https://games.spellingsuccess.com/level4-sightwords/content/Directions_for_Online_Sight_Word_Matching_Games.pdf"
+                   target="_blank" rel="noopener noreferrer"
+                   class="px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-sm font-semibold transition-all hover:scale-105 active:scale-95">
+                    Directions
+                </a>
+                <button id="btn-words" onclick="showScreen('selection')"
+                        class="px-3 py-1.5 rounded-full bg-white/20 hover:bg-white/30 text-sm font-semibold transition-all hover:scale-105 active:scale-95">
+                    Words
+                </button>
+                <div class="relative">
+                    <button id="btn-audio" onclick="toggleVolumeControl()"
+                            class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition-all hover:scale-105 active:scale-95">
+                        <svg id="icon-audio-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"/>
+                        </svg>
+                        <svg id="icon-audio-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                        </svg>
+                    </button>
+                    <!-- Volume Control Popup -->
+                    <div id="volume-control" class="hidden absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl p-4 min-w-[200px] z-50">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                            </svg>
+                            <input type="range" id="volume-slider" min="0" max="100" value="50"
+                                   class="volume-slider flex-1 h-2 bg-gradient-to-r from-blue-200 to-blue-500 rounded-full appearance-none cursor-pointer"
+                                   oninput="setVolume(this.value)">
+                            <span id="volume-value" class="text-gray-700 text-sm font-bold min-w-[36px] text-right">50%</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Word Selection Screen -->
+    <section id="screen-selection" class="max-w-5xl mx-auto px-4 py-6">
+        <div class="text-center mb-6">
+            <h2 class="text-3xl md:text-4xl font-extrabold mb-2">Choose Your Words!</h2>
+            <p class="text-white/80 text-lg">Select words from the lessons below to create your game</p>
+        </div>
+
+        <!-- Word Count & Game Size Indicator -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+            <div class="bg-white/20 backdrop-blur rounded-full px-5 py-2 flex items-center gap-2">
+                <span class="font-bold text-lg" id="word-count">0</span>
+                <span class="text-white/80">words selected</span>
+            </div>
+            <div id="game-size" class="bg-white/20 backdrop-blur rounded-full px-5 py-2 font-bold text-lg">
+                No Words
+            </div>
+        </div>
+
+        <!-- Lesson Containers -->
+        <div id="lessons-container" class="space-y-4 mb-6">
+            <!-- Lessons will be generated by JS -->
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex flex-wrap items-center justify-center gap-4 mb-6">
+            <button onclick="clearAllSelections()"
+                    class="px-6 py-3 rounded-full bg-red-500/80 hover:bg-red-500 font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg">
+                Clear Selection
+            </button>
+            <button onclick="startGame()"
+                    id="btn-start-game"
+                    class="px-8 py-3 rounded-full bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 font-bold text-lg transition-all hover:scale-110 active:scale-95 shadow-lg shadow-green-500/30 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    disabled>
+                Start New Game!
+            </button>
+        </div>
+    </section>
+
+    <!-- Game Screen -->
+    <section id="screen-game" class="hidden">
+        <!-- Player Info Bar -->
+        <div class="max-w-5xl mx-auto px-4 py-4">
+            <div class="flex flex-col sm:flex-row items-stretch gap-4 mb-4">
+                <!-- Player 1 Card -->
+                <div id="player1-card" class="flex-1 rounded-2xl p-4 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 border-2 border-cyan-400/50 transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-500 flex items-center justify-center font-extrabold text-lg shadow-lg">1</div>
+                        <input type="text" id="player1-name" value="Player 1" maxlength="15"
+                               class="bg-transparent border-b-2 border-cyan-300/50 focus:border-cyan-300 outline-none text-lg font-bold placeholder-white/50 w-full transition-colors"
+                               placeholder="Player 1 Name">
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="text-4xl font-extrabold" id="player1-score">0</span>
+                        <span class="text-cyan-200/80 text-sm block">points</span>
+                    </div>
+                </div>
+
+                <!-- Turn Indicator -->
+                <div class="flex items-center justify-center px-4">
+                    <div id="turn-indicator" class="text-center">
+                        <p class="text-lg font-bold animate-pulse-glow rounded-full px-4 py-2 bg-white/10 backdrop-blur">
+                            <span id="turn-text">It is Player 1's turn</span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Player 2 Card -->
+                <div id="player2-card" class="flex-1 rounded-2xl p-4 bg-gradient-to-r from-orange-500/30 to-yellow-500/30 border-2 border-orange-400/50 transition-all duration-300">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-orange-400 to-yellow-500 flex items-center justify-center font-extrabold text-lg shadow-lg">2</div>
+                        <input type="text" id="player2-name" value="Player 2" maxlength="15"
+                               class="bg-transparent border-b-2 border-orange-300/50 focus:border-orange-300 outline-none text-lg font-bold placeholder-white/50 w-full transition-colors"
+                               placeholder="Player 2 Name">
+                    </div>
+                    <div class="mt-2 text-center">
+                        <span class="text-4xl font-extrabold" id="player2-score">0</span>
+                        <span class="text-orange-200/80 text-sm block">points</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Size Badge -->
+            <div class="text-center mb-4">
+                <span id="game-size-badge" class="bg-white/20 backdrop-blur rounded-full px-4 py-1 text-sm font-bold"></span>
+            </div>
+        </div>
+
+        <!-- Game Board -->
+        <div class="flex justify-center px-2 md:px-4 pb-8">
+            <div id="game-board" class="w-[90%] max-w-[2500px] grid gap-2 md:gap-3">
+                <!-- Cards will be generated by JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Victory Screen -->
+    <section id="screen-victory" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <canvas id="confetti-canvas" class="confetti-canvas"></canvas>
+        <div class="text-center animate-slide-up z-10">
+            <div id="victory-message" class="animate-grow-text">
+                <h2 class="text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg" id="winner-text"></h2>
+                <p class="text-2xl md:text-3xl font-bold text-white/90 mb-2" id="victory-scores"></p>
+            </div>
+            <button onclick="playAgain()"
+                    class="mt-8 px-10 py-4 rounded-full bg-gradient-to-r from-yellow-400 via-pink-500 to-purple-500 hover:from-yellow-500 hover:via-pink-600 hover:to-purple-600 font-extrabold text-2xl transition-all hover:scale-110 active:scale-95 shadow-2xl animate-fade-in"
+                    style="animation-delay: 1s; animation-fill-mode: both;">
+                Play Again!
+            </button>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="text-center py-6 px-4 text-white/60 text-xs space-y-1">
+        <p>Copyright &copy; <span id="copyright-year"></span> by Janna Brenhaug. All rights reserved.</p>
+        <p>This game assumes the student is being tutored using the Barton Reading &amp; Spelling System.</p>
+        <p>These units are used with prior written permission from Susan Barton.</p>
+    </footer>
+
+    <script src="game.js"></script>
+</body>
+</html>
