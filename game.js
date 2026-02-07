@@ -336,27 +336,32 @@ function updateWordCount() {
     }
 }
 
-// --- Per-Player Color Picker ---
+// --- Per-Player Color Picker Dialog ---
+let activeColorPickerPlayer = null;
+
 function togglePlayerColorPicker(player) {
-    const picker = document.getElementById(`player${player}-color-picker`);
-    const isHidden = picker.classList.contains('hidden');
+    const dialog = document.getElementById('color-picker-dialog');
+    const isOpen = !dialog.classList.contains('hidden') && activeColorPickerPlayer === player;
 
-    // Close all pickers first
-    closeAllColorPickers();
-
-    if (isHidden) {
-        renderPlayerColorOptions(player);
-        picker.classList.remove('hidden');
+    if (isOpen) {
+        closeColorPickerDialog();
+        return;
     }
+
+    activeColorPickerPlayer = player;
+    const playerName = document.getElementById(`player${player}-name`).value || `Player ${player}`;
+    document.getElementById('color-picker-subtitle').textContent = playerName;
+    renderColorPickerOptions(player);
+    dialog.classList.remove('hidden');
 }
 
-function closeAllColorPickers() {
-    document.getElementById('player1-color-picker').classList.add('hidden');
-    document.getElementById('player2-color-picker').classList.add('hidden');
+function closeColorPickerDialog() {
+    document.getElementById('color-picker-dialog').classList.add('hidden');
+    activeColorPickerPlayer = null;
 }
 
-function renderPlayerColorOptions(player) {
-    const container = document.getElementById(`player${player}-color-options`);
+function renderColorPickerOptions(player) {
+    const container = document.getElementById('color-picker-options');
     container.innerHTML = '';
     const colorNames = Object.keys(PLAYER_COLORS);
     const otherPlayer = player === 1 ? 2 : 1;
@@ -367,7 +372,7 @@ function renderPlayerColorOptions(player) {
         const isSelected = colorChoices[player] === colorName;
 
         const btn = document.createElement('button');
-        btn.className = `w-10 h-10 rounded-full border-4 transition-all ${
+        btn.className = `w-12 h-12 rounded-full border-4 transition-all ${
             isSelected ? 'border-gray-800 scale-110 ring-2 ring-gray-400' : 'border-transparent'
         } ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'}`;
         btn.style.backgroundColor = color.hex;
@@ -378,7 +383,7 @@ function renderPlayerColorOptions(player) {
             btn.addEventListener('click', () => {
                 colorChoices[player] = colorName;
                 applyPlayerColor(player);
-                closeAllColorPickers();
+                closeColorPickerDialog();
             });
         }
 
@@ -728,14 +733,11 @@ document.addEventListener('click', (e) => {
         volumeControl.classList.add('hidden');
     }
 
-    // Close color pickers when clicking outside
-    [1, 2].forEach(player => {
-        const picker = document.getElementById(`player${player}-color-picker`);
-        const btn = document.getElementById(`player${player}-color-btn`);
-        if (picker && btn && !picker.contains(e.target) && !btn.contains(e.target)) {
-            picker.classList.add('hidden');
-        }
-    });
+    // Close color picker dialog when clicking backdrop
+    const colorDialog = document.getElementById('color-picker-dialog');
+    if (e.target === colorDialog) {
+        closeColorPickerDialog();
+    }
 });
 
 // --- Restart Modal ---

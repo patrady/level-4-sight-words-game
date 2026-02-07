@@ -226,11 +226,6 @@
                                 class="w-7 h-7 rounded-full border-2 border-white/50 hover:border-white hover:scale-110 transition-all cursor-pointer flex-shrink-0"
                                 id="player1-color-btn" style="background-color: #0e7490;"></button>
                     </div>
-                    <!-- Color picker popup -->
-                    <div id="player1-color-picker" class="hidden absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl p-3 z-50">
-                        <p class="text-gray-600 text-xs font-bold mb-2">Change color</p>
-                        <div class="flex gap-2" id="player1-color-options"></div>
-                    </div>
                     <div class="mt-2 text-center">
                         <span class="text-4xl font-extrabold" id="player1-score">0</span>
                         <span class="text-white/70 text-sm block">points</span>
@@ -256,11 +251,6 @@
                         <button onclick="togglePlayerColorPicker(2)" title="Change color"
                                 class="w-7 h-7 rounded-full border-2 border-white/50 hover:border-white hover:scale-110 transition-all cursor-pointer flex-shrink-0"
                                 id="player2-color-btn" style="background-color: #c2410c;"></button>
-                    </div>
-                    <!-- Color picker popup -->
-                    <div id="player2-color-picker" class="hidden absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl p-3 z-50">
-                        <p class="text-gray-600 text-xs font-bold mb-2">Change color</p>
-                        <div class="flex gap-2" id="player2-color-options"></div>
                     </div>
                     <div class="mt-2 text-center">
                         <span class="text-4xl font-extrabold" id="player2-score">0</span>
@@ -306,6 +296,15 @@
             </button>
         </div>
     </section>
+
+    <!-- Color Picker Dialog -->
+    <div id="color-picker-dialog" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm mx-4 text-center animate-slide-up">
+            <h3 class="text-lg font-extrabold text-gray-800 mb-1" id="color-picker-title">Change color</h3>
+            <p class="text-gray-500 text-sm mb-4" id="color-picker-subtitle"></p>
+            <div class="flex gap-3 justify-center" id="color-picker-options"></div>
+        </div>
+    </div>
 
     <!-- Restart Confirmation Modal -->
     <div id="restart-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
