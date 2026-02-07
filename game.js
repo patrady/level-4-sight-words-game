@@ -36,6 +36,21 @@ const gameState = {
     currentScreen: 'selection'
 };
 
+// --- Player Color System ---
+const PLAYER_COLORS = {
+    maroon:  { bg700: 'bg-red-900',    bg500: 'bg-red-800',    border300: 'border-red-300',    border400_30: 'border-red-400/30',   shadow: 'shadow-red-400/40',    text300: 'text-red-300',    hex: '#7f1d1d' },
+    purple:  { bg700: 'bg-purple-700',  bg500: 'bg-purple-500',  border300: 'border-purple-300',  border400_30: 'border-purple-400/30', shadow: 'shadow-purple-400/40',  text300: 'text-purple-300',  hex: '#7e22ce' },
+    green:   { bg700: 'bg-green-700',   bg500: 'bg-green-500',   border300: 'border-green-300',   border400_30: 'border-green-400/30',  shadow: 'shadow-green-400/40',   text300: 'text-green-300',   hex: '#15803d' },
+    orange:  { bg700: 'bg-orange-700',  bg500: 'bg-orange-500',  border300: 'border-orange-300',  border400_30: 'border-orange-400/30', shadow: 'shadow-orange-400/40',  text300: 'text-orange-300',  hex: '#c2410c' },
+    blue:    { bg700: 'bg-cyan-700',    bg500: 'bg-cyan-500',    border300: 'border-cyan-300',    border400_30: 'border-cyan-400/30',   shadow: 'shadow-cyan-400/40',    text300: 'text-cyan-300',    hex: '#0e7490' }
+};
+
+const colorChoices = { 1: 'blue', 2: 'orange' };
+
+function getPlayerColor(player) {
+    return PLAYER_COLORS[colorChoices[player]];
+}
+
 // --- Audio System ---
 const AudioSystem = {
     context: null,
@@ -321,12 +336,97 @@ function updateWordCount() {
     }
 }
 
+// --- Color Chooser ---
+function showColorChooser() {
+    const modal = document.getElementById('color-chooser-modal');
+
+    // Reset defaults
+    colorChoices[1] = 'blue';
+    colorChoices[2] = 'orange';
+
+    // Update labels with current player names
+    const name1 = document.getElementById('player1-name').value || 'Player 1';
+    const name2 = document.getElementById('player2-name').value || 'Player 2';
+    document.getElementById('color-chooser-p1-label').textContent = name1;
+    document.getElementById('color-chooser-p2-label').textContent = name2;
+
+    renderColorOptions();
+    modal.classList.remove('hidden');
+}
+
+function renderColorOptions() {
+    const colorNames = Object.keys(PLAYER_COLORS);
+
+    [1, 2].forEach(player => {
+        const container = document.getElementById(`color-options-p${player}`);
+        container.innerHTML = '';
+
+        colorNames.forEach(colorName => {
+            const color = PLAYER_COLORS[colorName];
+            const otherPlayer = player === 1 ? 2 : 1;
+            const isDisabled = colorChoices[otherPlayer] === colorName;
+            const isSelected = colorChoices[player] === colorName;
+
+            const btn = document.createElement('button');
+            btn.className = `w-12 h-12 rounded-full border-4 transition-all ${
+                isSelected ? 'border-gray-800 scale-110 ring-2 ring-gray-400' : 'border-transparent'
+            } ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'}`;
+            btn.style.backgroundColor = color.hex;
+            btn.disabled = isDisabled;
+            btn.title = colorName.charAt(0).toUpperCase() + colorName.slice(1);
+
+            if (!isDisabled) {
+                btn.addEventListener('click', () => {
+                    colorChoices[player] = colorName;
+                    renderColorOptions();
+                });
+            }
+
+            container.appendChild(btn);
+        });
+    });
+}
+
+function confirmColorChoices() {
+    document.getElementById('color-chooser-modal').classList.add('hidden');
+    applyPlayerColors();
+    launchGame();
+}
+
+function applyPlayerColors() {
+    // Update player badge colors
+    const badge1 = document.querySelector('#player1-card .rounded-full');
+    const badge2 = document.querySelector('#player2-card .rounded-full');
+    const c1 = getPlayerColor(1);
+    const c2 = getPlayerColor(2);
+
+    // Remove old badge color classes and add new ones
+    const allBgClasses = Object.values(PLAYER_COLORS).map(c => c.bg500);
+    badge1.classList.remove(...allBgClasses);
+    badge1.classList.add(c1.bg500);
+    badge2.classList.remove(...allBgClasses);
+    badge2.classList.add(c2.bg500);
+
+    // Update player card border colors
+    const card1 = document.getElementById('player1-card');
+    const card2 = document.getElementById('player2-card');
+    const allBorderClasses = Object.values(PLAYER_COLORS).map(c => c.border400_30.replace('/30', '/50'));
+    const allBorder400Classes = Object.values(PLAYER_COLORS).map(c => c.border400_30);
+    // Remove old border classes
+    card1.className = card1.className.replace(/border-\S+\/50/g, '').trim();
+    card2.className = card2.className.replace(/border-\S+\/50/g, '').trim();
+    card1.classList.add(c1.border400_30.replace('/30', '/50'));
+    card2.classList.add(c2.border400_30.replace('/30', '/50'));
+}
+
 // --- Game Setup ---
 function startGame() {
     if (gameState.selectedWords.size === 0) return;
-
     AudioSystem.ensureContext();
+    showColorChooser();
+}
 
+function launchGame() {
     const words = Array.from(gameState.selectedWords);
     const cardPairs = [];
 
@@ -518,17 +618,21 @@ function updateScoreDisplay() {
     activeScoreEl.classList.add('animate-score-pop');
 }
 
-// Player card style classes for active/inactive states
-const PLAYER_STYLES = {
-    1: {
-        active: ['bg-cyan-700', 'border-cyan-300', 'shadow-lg', 'shadow-cyan-400/40'],
-        inactive: ['bg-white/5', 'border-cyan-400/30']
-    },
-    2: {
-        active: ['bg-orange-700', 'border-orange-300', 'shadow-lg', 'shadow-orange-400/40'],
-        inactive: ['bg-white/5', 'border-orange-400/30']
-    }
-};
+// Player card style classes for active/inactive states (dynamic based on color choices)
+function getPlayerStyles() {
+    const c1 = getPlayerColor(1);
+    const c2 = getPlayerColor(2);
+    return {
+        1: {
+            active: [c1.bg700, c1.border300, 'shadow-lg', c1.shadow],
+            inactive: ['bg-white/5', c1.border400_30]
+        },
+        2: {
+            active: [c2.bg700, c2.border300, 'shadow-lg', c2.shadow],
+            inactive: ['bg-white/5', c2.border400_30]
+        }
+    };
+}
 
 function updateTurnIndicator() {
     const turnText = document.getElementById('turn-text');
@@ -538,17 +642,24 @@ function updateTurnIndicator() {
 
     turnText.textContent = `It is ${playerName}'s turn`;
 
+    const styles = getPlayerStyles();
+
     // Remove all dynamic styles first
-    const allStyles = [...PLAYER_STYLES[1].active, ...PLAYER_STYLES[1].inactive, ...PLAYER_STYLES[2].active, ...PLAYER_STYLES[2].inactive];
+    const allStyles = [...styles[1].active, ...styles[1].inactive, ...styles[2].active, ...styles[2].inactive];
     player1Card.classList.remove(...allStyles);
     player2Card.classList.remove(...allStyles);
 
+    // Also remove all possible color classes to avoid stale styles from previous color choices
+    const allColorClasses = Object.values(PLAYER_COLORS).flatMap(c => [c.bg700, c.border300, c.shadow, c.border400_30]);
+    player1Card.classList.remove(...allColorClasses, 'bg-white/5', 'shadow-lg');
+    player2Card.classList.remove(...allColorClasses, 'bg-white/5', 'shadow-lg');
+
     if (gameState.currentPlayer === 1) {
-        player1Card.classList.add(...PLAYER_STYLES[1].active);
-        player2Card.classList.add(...PLAYER_STYLES[2].inactive);
+        player1Card.classList.add(...styles[1].active);
+        player2Card.classList.add(...styles[2].inactive);
     } else {
-        player2Card.classList.add(...PLAYER_STYLES[2].active);
-        player1Card.classList.add(...PLAYER_STYLES[1].inactive);
+        player2Card.classList.add(...styles[2].active);
+        player1Card.classList.add(...styles[1].inactive);
     }
 }
 
@@ -562,12 +673,15 @@ function showVictory() {
     const winnerText = document.getElementById('winner-text');
     const scoresText = document.getElementById('victory-scores');
 
+    const c1 = getPlayerColor(1);
+    const c2 = getPlayerColor(2);
+
     if (score1 > score2) {
         winnerText.textContent = `${name1} Wins!`;
-        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-cyan-300';
+        winnerText.className = `text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg ${c1.text300}`;
     } else if (score2 > score1) {
         winnerText.textContent = `${name2} Wins!`;
-        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-orange-300';
+        winnerText.className = `text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg ${c2.text300}`;
     } else {
         winnerText.textContent = "It's a Tie!";
         winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-pink-300';

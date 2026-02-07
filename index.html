@@ -291,6 +291,32 @@
         </div>
     </section>
 
+    <!-- Color Chooser Modal -->
+    <div id="color-chooser-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4 animate-slide-up">
+            <h3 class="text-xl font-extrabold text-gray-800 mb-4 text-center">Choose Your Colors</h3>
+
+            <!-- Player 1 Color -->
+            <div class="mb-4">
+                <p class="text-gray-700 font-bold mb-2" id="color-chooser-p1-label">Player 1</p>
+                <div class="flex gap-2" id="color-options-p1"></div>
+            </div>
+
+            <!-- Player 2 Color -->
+            <div class="mb-6">
+                <p class="text-gray-700 font-bold mb-2" id="color-chooser-p2-label">Player 2</p>
+                <div class="flex gap-2" id="color-options-p2"></div>
+            </div>
+
+            <div class="text-center">
+                <button onclick="confirmColorChoices()"
+                        class="px-8 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg">
+                    Start Game
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Restart Confirmation Modal -->
     <div id="restart-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-sm mx-4 text-center animate-slide-up">
