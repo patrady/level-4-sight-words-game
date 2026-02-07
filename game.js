@@ -31,7 +31,7 @@ const gameState = {
     currentPlayer: 1,
     scores: { 1: 0, 2: 0 },
     isProcessing: false,
-    volume: 50,
+    volume: 20,
     isMuted: false,
     currentScreen: 'selection'
 };
@@ -241,7 +241,7 @@ function buildLessonUI() {
 
     lessons.forEach(lesson => {
         const lessonDiv = document.createElement('div');
-        lessonDiv.className = 'bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20';
+        lessonDiv.className = 'bg-white/10 backdrop-blur rounded-2xl p-4 border border-white/20 flex flex-col';
         lessonDiv.innerHTML = `
             <div class="flex items-center justify-between mb-3">
                 <h3 class="text-xl font-extrabold">${lesson.name}</h3>
@@ -251,14 +251,14 @@ function buildLessonUI() {
                     Select All
                 </button>
             </div>
-            <div class="flex flex-wrap gap-2" id="lesson-words-${lesson.id}">
+            <div class="flex flex-col gap-1.5" id="lesson-words-${lesson.id}">
                 ${lesson.words.map(word => `
                     <label class="cursor-pointer select-none">
                         <input type="checkbox" class="hidden word-checkbox" data-lesson="${lesson.id}" data-word="${word}"
                                onchange="handleWordToggle(this)">
-                        <span class="inline-block px-4 py-2 rounded-full text-base font-bold transition-all
+                        <span class="block px-4 py-2 rounded-lg text-base font-bold transition-all
                                      bg-white/10 hover:bg-white/20 border-2 border-transparent
-                                     hover:scale-105 active:scale-95"
+                                     hover:scale-[1.02] active:scale-95 text-center"
                               id="word-chip-${lesson.id}-${word}">
                             ${word}
                         </span>
@@ -314,29 +314,30 @@ function clearAllSelections() {
     });
 }
 
+function getGameSizeLabel(count) {
+    if (count <= 8) return 'Small';
+    if (count <= 12) return 'Medium';
+    return 'Large';
+}
+
 function updateWordCount() {
     const count = gameState.selectedWords.size;
-    document.getElementById('word-count').textContent = count;
 
     const sizeEl = document.getElementById('game-size');
     const startBtn = document.getElementById('btn-start-game');
+    const clearBtn = document.getElementById('btn-clear-selection');
 
     if (count === 0) {
-        sizeEl.textContent = 'No Words';
-        sizeEl.className = 'bg-white/20 backdrop-blur rounded-full px-5 py-2 font-bold text-lg';
+        sizeEl.textContent = 'No words selected';
+        startBtn.textContent = 'Start New Game';
         startBtn.disabled = true;
-    } else if (count <= 8) {
-        sizeEl.textContent = `Small Game (${count} words)`;
-        sizeEl.className = 'bg-green-500/40 backdrop-blur rounded-full px-5 py-2 font-bold text-lg';
-        startBtn.disabled = false;
-    } else if (count <= 12) {
-        sizeEl.textContent = `Medium Game (${count} words)`;
-        sizeEl.className = 'bg-yellow-500/40 backdrop-blur rounded-full px-5 py-2 font-bold text-lg';
-        startBtn.disabled = false;
+        clearBtn.disabled = true;
     } else {
-        sizeEl.textContent = `Large Game (${count} words)`;
-        sizeEl.className = 'bg-red-500/40 backdrop-blur rounded-full px-5 py-2 font-bold text-lg';
+        const sizeLabel = getGameSizeLabel(count);
+        sizeEl.textContent = `${count} word${count === 1 ? '' : 's'} selected`;
+        startBtn.textContent = `Start ${sizeLabel} Game`;
         startBtn.disabled = false;
+        clearBtn.disabled = false;
     }
 }
 
@@ -399,8 +400,7 @@ function buildGameBoard() {
         cardEl.innerHTML = `
             <div class="card-inner" id="card-inner-${card.id}">
                 <div class="card-front bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg border-2 border-white/30 flex flex-col items-center justify-center p-2">
-                    <div class="text-2xl md:text-3xl font-extrabold text-white/30 tracking-widest">SS</div>
-                    <div class="text-[10px] md:text-xs text-white/40 mt-1 font-semibold">Spelling Success</div>
+                    <div class="text-xs md:text-sm font-extrabold text-white/40 tracking-wide text-center leading-tight">Spelling<br>Success</div>
                 </div>
                 <div class="card-back bg-gradient-to-br from-white to-gray-100 shadow-lg border-2 border-blue-300 flex items-center justify-center p-2">
                     <span class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center leading-tight">${card.word}</span>
@@ -538,6 +538,18 @@ function updateScoreDisplay() {
     activeScoreEl.classList.add('animate-score-pop');
 }
 
+// Player card style classes for active/inactive states
+const PLAYER_STYLES = {
+    1: {
+        active: ['bg-gradient-to-r', 'from-cyan-600', 'to-blue-700', 'border-cyan-300', 'shadow-lg', 'shadow-cyan-400/40'],
+        inactive: ['bg-white/5', 'border-cyan-400/30']
+    },
+    2: {
+        active: ['bg-gradient-to-r', 'from-orange-600', 'to-amber-700', 'border-orange-300', 'shadow-lg', 'shadow-orange-400/40'],
+        inactive: ['bg-white/5', 'border-orange-400/30']
+    }
+};
+
 function updateTurnIndicator() {
     const turnText = document.getElementById('turn-text');
     const player1Card = document.getElementById('player1-card');
@@ -546,12 +558,17 @@ function updateTurnIndicator() {
 
     turnText.textContent = `It is ${playerName}'s turn`;
 
+    // Remove all dynamic styles first
+    const allStyles = [...PLAYER_STYLES[1].active, ...PLAYER_STYLES[1].inactive, ...PLAYER_STYLES[2].active, ...PLAYER_STYLES[2].inactive];
+    player1Card.classList.remove(...allStyles);
+    player2Card.classList.remove(...allStyles);
+
     if (gameState.currentPlayer === 1) {
-        player1Card.classList.add('ring-4', 'ring-cyan-400', 'shadow-lg', 'shadow-cyan-400/30');
-        player2Card.classList.remove('ring-4', 'ring-orange-400', 'shadow-lg', 'shadow-orange-400/30');
+        player1Card.classList.add(...PLAYER_STYLES[1].active);
+        player2Card.classList.add(...PLAYER_STYLES[2].inactive);
     } else {
-        player2Card.classList.add('ring-4', 'ring-orange-400', 'shadow-lg', 'shadow-orange-400/30');
-        player1Card.classList.remove('ring-4', 'ring-cyan-400', 'shadow-lg', 'shadow-cyan-400/30');
+        player2Card.classList.add(...PLAYER_STYLES[2].active);
+        player1Card.classList.add(...PLAYER_STYLES[1].inactive);
     }
 }
 
@@ -621,6 +638,21 @@ document.addEventListener('click', (e) => {
         volumeControl.classList.add('hidden');
     }
 });
+
+// --- Restart Modal ---
+function openRestartModal() {
+    document.getElementById('restart-modal').classList.remove('hidden');
+}
+
+function closeRestartModal() {
+    document.getElementById('restart-modal').classList.add('hidden');
+}
+
+function confirmRestart() {
+    closeRestartModal();
+    ConfettiSystem.stop();
+    showScreen('selection');
+}
 
 // --- Responsive Grid on Resize ---
 window.addEventListener('resize', () => {
