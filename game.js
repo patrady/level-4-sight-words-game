@@ -86,22 +86,14 @@ const AudioSystem = {
         this.playTone(800, 0.1, 'sine');
     },
 
+    matchSound: new Audio('https://games.spellingsuccess.com/level4-sightwords/gmgs/yay.mp3'),
+    victorySound: new Audio('https://games.spellingsuccess.com/level4-sightwords/gmgs/cheers_v4.mp3'),
+
     playMatch() {
-        this.ensureContext();
-        if (!this.context || this.getVolume() === 0) return;
-        const now = this.context.currentTime;
-        [523, 659, 784].forEach((freq, i) => {
-            const osc = this.context.createOscillator();
-            const gain = this.context.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.12);
-            gain.gain.setValueAtTime(this.getVolume() * 0.3, now + i * 0.12);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.12 + 0.3);
-            osc.connect(gain);
-            gain.connect(this.context.destination);
-            osc.start(now + i * 0.12);
-            osc.stop(now + i * 0.12 + 0.3);
-        });
+        if (this.getVolume() === 0) return;
+        this.matchSound.volume = this.getVolume();
+        this.matchSound.currentTime = 0;
+        this.matchSound.play().catch(() => {});
     },
 
     playNoMatch() {
@@ -123,22 +115,10 @@ const AudioSystem = {
     },
 
     playVictory() {
-        this.ensureContext();
-        if (!this.context || this.getVolume() === 0) return;
-        const now = this.context.currentTime;
-        const melody = [523, 587, 659, 784, 659, 784, 1047];
-        melody.forEach((freq, i) => {
-            const osc = this.context.createOscillator();
-            const gain = this.context.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(freq, now + i * 0.15);
-            gain.gain.setValueAtTime(this.getVolume() * 0.3, now + i * 0.15);
-            gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.15 + 0.4);
-            osc.connect(gain);
-            gain.connect(this.context.destination);
-            osc.start(now + i * 0.15);
-            osc.stop(now + i * 0.15 + 0.4);
-        });
+        if (this.getVolume() === 0) return;
+        this.victorySound.volume = this.getVolume();
+        this.victorySound.currentTime = 0;
+        this.victorySound.play().catch(() => {});
     }
 };
 
