@@ -336,94 +336,90 @@ function updateWordCount() {
     }
 }
 
-// --- Color Chooser ---
-function showColorChooser() {
-    const modal = document.getElementById('color-chooser-modal');
+// --- Per-Player Color Picker ---
+function togglePlayerColorPicker(player) {
+    const picker = document.getElementById(`player${player}-color-picker`);
+    const isHidden = picker.classList.contains('hidden');
 
-    // Reset defaults
-    colorChoices[1] = 'blue';
-    colorChoices[2] = 'orange';
+    // Close all pickers first
+    closeAllColorPickers();
 
-    // Update labels with current player names
-    const name1 = document.getElementById('player1-name').value || 'Player 1';
-    const name2 = document.getElementById('player2-name').value || 'Player 2';
-    document.getElementById('color-chooser-p1-label').textContent = name1;
-    document.getElementById('color-chooser-p2-label').textContent = name2;
-
-    renderColorOptions();
-    modal.classList.remove('hidden');
+    if (isHidden) {
+        renderPlayerColorOptions(player);
+        picker.classList.remove('hidden');
+    }
 }
 
-function renderColorOptions() {
+function closeAllColorPickers() {
+    document.getElementById('player1-color-picker').classList.add('hidden');
+    document.getElementById('player2-color-picker').classList.add('hidden');
+}
+
+function renderPlayerColorOptions(player) {
+    const container = document.getElementById(`player${player}-color-options`);
+    container.innerHTML = '';
     const colorNames = Object.keys(PLAYER_COLORS);
+    const otherPlayer = player === 1 ? 2 : 1;
 
-    [1, 2].forEach(player => {
-        const container = document.getElementById(`color-options-p${player}`);
-        container.innerHTML = '';
+    colorNames.forEach(colorName => {
+        const color = PLAYER_COLORS[colorName];
+        const isDisabled = colorChoices[otherPlayer] === colorName;
+        const isSelected = colorChoices[player] === colorName;
 
-        colorNames.forEach(colorName => {
-            const color = PLAYER_COLORS[colorName];
-            const otherPlayer = player === 1 ? 2 : 1;
-            const isDisabled = colorChoices[otherPlayer] === colorName;
-            const isSelected = colorChoices[player] === colorName;
+        const btn = document.createElement('button');
+        btn.className = `w-10 h-10 rounded-full border-4 transition-all ${
+            isSelected ? 'border-gray-800 scale-110 ring-2 ring-gray-400' : 'border-transparent'
+        } ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'}`;
+        btn.style.backgroundColor = color.hex;
+        btn.disabled = isDisabled;
+        btn.title = colorName.charAt(0).toUpperCase() + colorName.slice(1);
 
-            const btn = document.createElement('button');
-            btn.className = `w-12 h-12 rounded-full border-4 transition-all ${
-                isSelected ? 'border-gray-800 scale-110 ring-2 ring-gray-400' : 'border-transparent'
-            } ${isDisabled ? 'opacity-30 cursor-not-allowed' : 'hover:scale-110 cursor-pointer'}`;
-            btn.style.backgroundColor = color.hex;
-            btn.disabled = isDisabled;
-            btn.title = colorName.charAt(0).toUpperCase() + colorName.slice(1);
+        if (!isDisabled) {
+            btn.addEventListener('click', () => {
+                colorChoices[player] = colorName;
+                applyPlayerColor(player);
+                closeAllColorPickers();
+            });
+        }
 
-            if (!isDisabled) {
-                btn.addEventListener('click', () => {
-                    colorChoices[player] = colorName;
-                    renderColorOptions();
-                });
-            }
-
-            container.appendChild(btn);
-        });
+        container.appendChild(btn);
     });
 }
 
-function confirmColorChoices() {
-    document.getElementById('color-chooser-modal').classList.add('hidden');
-    applyPlayerColors();
-    launchGame();
-}
+function applyPlayerColor(player) {
+    const c = getPlayerColor(player);
 
-function applyPlayerColors() {
-    // Update player badge colors
-    const badge1 = document.querySelector('#player1-card .rounded-full');
-    const badge2 = document.querySelector('#player2-card .rounded-full');
-    const c1 = getPlayerColor(1);
-    const c2 = getPlayerColor(2);
+    // Update badge
+    const badge = document.getElementById(`player${player}-badge`);
+    const allBgClasses = Object.values(PLAYER_COLORS).map(col => col.bg500);
+    badge.classList.remove(...allBgClasses);
+    badge.classList.add(c.bg500);
 
-    // Remove old badge color classes and add new ones
-    const allBgClasses = Object.values(PLAYER_COLORS).map(c => c.bg500);
-    badge1.classList.remove(...allBgClasses);
-    badge1.classList.add(c1.bg500);
-    badge2.classList.remove(...allBgClasses);
-    badge2.classList.add(c2.bg500);
+    // Update the small color button
+    const colorBtn = document.getElementById(`player${player}-color-btn`);
+    colorBtn.style.backgroundColor = c.hex;
 
-    // Update player card border colors
-    const card1 = document.getElementById('player1-card');
-    const card2 = document.getElementById('player2-card');
-    const allBorderClasses = Object.values(PLAYER_COLORS).map(c => c.border400_30.replace('/30', '/50'));
-    const allBorder400Classes = Object.values(PLAYER_COLORS).map(c => c.border400_30);
-    // Remove old border classes
-    card1.className = card1.className.replace(/border-\S+\/50/g, '').trim();
-    card2.className = card2.className.replace(/border-\S+\/50/g, '').trim();
-    card1.classList.add(c1.border400_30.replace('/30', '/50'));
-    card2.classList.add(c2.border400_30.replace('/30', '/50'));
+    // Update player card border
+    const card = document.getElementById(`player${player}-card`);
+    card.className = card.className.replace(/border-\S+\/50/g, '').trim();
+    card.classList.add(c.border400_30.replace('/30', '/50'));
+
+    // Re-apply turn indicator styles
+    updateTurnIndicator();
 }
 
 // --- Game Setup ---
 function startGame() {
     if (gameState.selectedWords.size === 0) return;
     AudioSystem.ensureContext();
-    showColorChooser();
+
+    // Reset to default colors
+    colorChoices[1] = 'blue';
+    colorChoices[2] = 'orange';
+    applyPlayerColor(1);
+    applyPlayerColor(2);
+
+    launchGame();
 }
 
 function launchGame() {
@@ -724,13 +720,22 @@ function setVolume(value) {
     }
 }
 
-// Close volume control when clicking outside
+// Close volume control and color pickers when clicking outside
 document.addEventListener('click', (e) => {
     const volumeControl = document.getElementById('volume-control');
     const audioBtn = document.getElementById('btn-audio');
     if (!volumeControl.contains(e.target) && !audioBtn.contains(e.target)) {
         volumeControl.classList.add('hidden');
     }
+
+    // Close color pickers when clicking outside
+    [1, 2].forEach(player => {
+        const picker = document.getElementById(`player${player}-color-picker`);
+        const btn = document.getElementById(`player${player}-color-btn`);
+        if (picker && btn && !picker.contains(e.target) && !btn.contains(e.target)) {
+            picker.classList.add('hidden');
+        }
+    });
 });
 
 // --- Restart Modal ---

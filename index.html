@@ -216,12 +216,20 @@
         <div class="max-w-5xl mx-auto px-4 py-4">
             <div class="flex flex-col sm:flex-row items-stretch gap-4 mb-4">
                 <!-- Player 1 Card -->
-                <div id="player1-card" class="flex-1 rounded-2xl p-4 border-2 border-cyan-400/50 transition-all duration-300">
+                <div id="player1-card" class="flex-1 rounded-2xl p-4 border-2 border-cyan-400/50 transition-all duration-300 relative">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center font-extrabold text-lg shadow-lg">1</div>
+                        <div id="player1-badge" class="w-10 h-10 rounded-full bg-cyan-500 flex items-center justify-center font-extrabold text-lg shadow-lg">1</div>
                         <input type="text" id="player1-name" value="Player 1" maxlength="15"
                                class="bg-transparent border-b-2 border-white/40 focus:border-white outline-none text-lg font-bold placeholder-white/50 w-full transition-colors"
                                placeholder="Player 1 Name">
+                        <button onclick="togglePlayerColorPicker(1)" title="Change color"
+                                class="w-7 h-7 rounded-full border-2 border-white/50 hover:border-white hover:scale-110 transition-all cursor-pointer flex-shrink-0"
+                                id="player1-color-btn" style="background-color: #0e7490;"></button>
+                    </div>
+                    <!-- Color picker popup -->
+                    <div id="player1-color-picker" class="hidden absolute top-full left-0 mt-2 bg-white rounded-xl shadow-2xl p-3 z-50">
+                        <p class="text-gray-600 text-xs font-bold mb-2">Change color</p>
+                        <div class="flex gap-2" id="player1-color-options"></div>
                     </div>
                     <div class="mt-2 text-center">
                         <span class="text-4xl font-extrabold" id="player1-score">0</span>
@@ -239,12 +247,20 @@
                 </div>
 
                 <!-- Player 2 Card -->
-                <div id="player2-card" class="flex-1 rounded-2xl p-4 border-2 border-orange-400/50 transition-all duration-300">
+                <div id="player2-card" class="flex-1 rounded-2xl p-4 border-2 border-orange-400/50 transition-all duration-300 relative">
                     <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center font-extrabold text-lg shadow-lg">2</div>
+                        <div id="player2-badge" class="w-10 h-10 rounded-full bg-orange-500 flex items-center justify-center font-extrabold text-lg shadow-lg">2</div>
                         <input type="text" id="player2-name" value="Player 2" maxlength="15"
                                class="bg-transparent border-b-2 border-white/40 focus:border-white outline-none text-lg font-bold placeholder-white/50 w-full transition-colors"
                                placeholder="Player 2 Name">
+                        <button onclick="togglePlayerColorPicker(2)" title="Change color"
+                                class="w-7 h-7 rounded-full border-2 border-white/50 hover:border-white hover:scale-110 transition-all cursor-pointer flex-shrink-0"
+                                id="player2-color-btn" style="background-color: #c2410c;"></button>
+                    </div>
+                    <!-- Color picker popup -->
+                    <div id="player2-color-picker" class="hidden absolute top-full right-0 mt-2 bg-white rounded-xl shadow-2xl p-3 z-50">
+                        <p class="text-gray-600 text-xs font-bold mb-2">Change color</p>
+                        <div class="flex gap-2" id="player2-color-options"></div>
                     </div>
                     <div class="mt-2 text-center">
                         <span class="text-4xl font-extrabold" id="player2-score">0</span>
@@ -290,32 +306,6 @@
             </button>
         </div>
     </section>
-
-    <!-- Color Chooser Modal -->
-    <div id="color-chooser-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl p-6 max-w-md mx-4 animate-slide-up">
-            <h3 class="text-xl font-extrabold text-gray-800 mb-4 text-center">Choose Your Colors</h3>
-
-            <!-- Player 1 Color -->
-            <div class="mb-4">
-                <p class="text-gray-700 font-bold mb-2" id="color-chooser-p1-label">Player 1</p>
-                <div class="flex gap-2" id="color-options-p1"></div>
-            </div>
-
-            <!-- Player 2 Color -->
-            <div class="mb-6">
-                <p class="text-gray-700 font-bold mb-2" id="color-chooser-p2-label">Player 2</p>
-                <div class="flex gap-2" id="color-options-p2"></div>
-            </div>
-
-            <div class="text-center">
-                <button onclick="confirmColorChoices()"
-                        class="px-8 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg">
-                    Start Game
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- Restart Confirmation Modal -->
     <div id="restart-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
