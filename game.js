@@ -688,7 +688,13 @@ function showVictory() {
         winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-pink-300';
     }
 
-    scoresText.textContent = `${name1}: ${score1}  |  ${name2}: ${score2}`;
+    const pts1 = score1 === 1 ? 'point' : 'points';
+    const pts2 = score2 === 1 ? 'point' : 'points';
+    scoresText.innerHTML = `
+        <span class="inline-block px-4 py-1.5 rounded-full text-lg md:text-2xl font-bold ${c1.bg700} ${c1.text300} border ${c1.border300}">${name1}: ${score1} ${pts1}</span>
+        <span class="text-xl md:text-2xl font-bold text-white/70">vs</span>
+        <span class="inline-block px-4 py-1.5 rounded-full text-lg md:text-2xl font-bold ${c2.bg700} ${c2.text300} border ${c2.border300}">${name2}: ${score2} ${pts2}</span>
+    `;
 
     showScreen('victory');
     ConfettiSystem.init();
