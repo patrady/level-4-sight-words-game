@@ -399,10 +399,10 @@ function buildGameBoard() {
         cardEl.dataset.pairId = card.pairId;
         cardEl.innerHTML = `
             <div class="card-inner" id="card-inner-${card.id}">
-                <div class="card-front bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 shadow-lg border-2 border-white/30 flex flex-col items-center justify-center p-2">
+                <div class="card-front bg-indigo-500 shadow-lg border-2 border-white/30 flex flex-col items-center justify-center p-2">
                     <div class="text-xs md:text-sm font-extrabold text-white/40 tracking-wide text-center leading-tight">Spelling<br>Success</div>
                 </div>
-                <div class="card-back bg-gradient-to-br from-white to-gray-100 shadow-lg border-2 border-blue-300 flex items-center justify-center p-2">
+                <div class="card-back bg-white shadow-lg border-2 border-blue-300 flex items-center justify-center p-2">
                     <span class="text-xl sm:text-2xl md:text-3xl font-extrabold text-gray-800 text-center leading-tight">${card.word}</span>
                 </div>
             </div>
@@ -484,10 +484,10 @@ function checkForMatch() {
             // Update card back with matched appearance
             const back1 = inner1.querySelector('.card-back');
             const back2 = inner2.querySelector('.card-back');
-            back1.classList.remove('bg-gradient-to-br', 'from-white', 'to-gray-100', 'border-blue-300');
-            back1.classList.add('bg-gradient-to-br', 'from-green-200', 'to-emerald-300', 'border-green-400');
-            back2.classList.remove('bg-gradient-to-br', 'from-white', 'to-gray-100', 'border-blue-300');
-            back2.classList.add('bg-gradient-to-br', 'from-green-200', 'to-emerald-300', 'border-green-400');
+            back1.classList.remove('bg-white', 'border-blue-300');
+            back1.classList.add('bg-emerald-200', 'border-green-400');
+            back2.classList.remove('bg-white', 'border-blue-300');
+            back2.classList.add('bg-emerald-200', 'border-green-400');
 
             // Award point
             gameState.scores[gameState.currentPlayer]++;
@@ -541,11 +541,11 @@ function updateScoreDisplay() {
 // Player card style classes for active/inactive states
 const PLAYER_STYLES = {
     1: {
-        active: ['bg-gradient-to-r', 'from-cyan-600', 'to-blue-700', 'border-cyan-300', 'shadow-lg', 'shadow-cyan-400/40'],
+        active: ['bg-cyan-700', 'border-cyan-300', 'shadow-lg', 'shadow-cyan-400/40'],
         inactive: ['bg-white/5', 'border-cyan-400/30']
     },
     2: {
-        active: ['bg-gradient-to-r', 'from-orange-600', 'to-amber-700', 'border-orange-300', 'shadow-lg', 'shadow-orange-400/40'],
+        active: ['bg-orange-700', 'border-orange-300', 'shadow-lg', 'shadow-orange-400/40'],
         inactive: ['bg-white/5', 'border-orange-400/30']
     }
 };
@@ -584,13 +584,13 @@ function showVictory() {
 
     if (score1 > score2) {
         winnerText.textContent = `${name1} Wins!`;
-        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-blue-400';
+        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-cyan-300';
     } else if (score2 > score1) {
         winnerText.textContent = `${name2} Wins!`;
-        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-orange-300 to-yellow-400';
+        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-orange-300';
     } else {
         winnerText.textContent = "It's a Tie!";
-        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg bg-clip-text text-transparent bg-gradient-to-r from-pink-300 to-purple-400';
+        winnerText.className = 'text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg text-pink-300';
     }
 
     scoresText.textContent = `${name1}: ${score1}  |  ${name2}: ${score2}`;
