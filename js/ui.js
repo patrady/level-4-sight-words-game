@@ -197,6 +197,18 @@ function applyPlayerColor(player) {
     updateTurnIndicator();
 }
 
+// --- Mobile Menu ---
+function toggleMobileMenu() {
+    const menu = document.getElementById('mobile-menu');
+    const openIcon = document.getElementById('hamburger-icon');
+    const closeIcon = document.getElementById('hamburger-close-icon');
+    const isOpen = !menu.classList.contains('hidden');
+
+    menu.classList.toggle('hidden');
+    openIcon.classList.toggle('hidden', !isOpen);
+    closeIcon.classList.toggle('hidden', isOpen);
+}
+
 // --- Volume Controls ---
 function toggleVolumeControl() {
     const control = document.getElementById('volume-control');

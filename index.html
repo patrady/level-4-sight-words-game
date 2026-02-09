@@ -126,52 +126,84 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-50 bg-white shadow-md border-b border-gray-200">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <img src="https://www.spellingsuccess.com/wp-content/uploads/2021/04/spelling-success-logo-200px.png"
-                     alt="Spelling Success Logo" class="h-10 md:h-12 w-auto">
-                <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-                    <span class="text-indigo-600">Level 4</span>
-                    <span class="text-gray-600 text-lg md:text-xl ml-2">Sight Words</span>
-                </h1>
+        <div class="max-w-7xl mx-auto px-4 py-3">
+            <div class="flex items-center justify-between">
+                <!-- Logo & Title (stacks on small screens) -->
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-1 sm:gap-3">
+                    <img src="https://www.spellingsuccess.com/wp-content/uploads/2021/04/spelling-success-logo-200px.png"
+                         alt="Spelling Success Logo" class="h-10 md:h-12 w-auto">
+                    <h1 class="text-xl sm:text-2xl md:text-3xl font-extrabold tracking-tight">
+                        <span class="text-indigo-600">Level 4</span>
+                        <span class="text-gray-600 text-sm sm:text-lg md:text-xl ml-1 sm:ml-2">Sight Words</span>
+                    </h1>
+                </div>
+                <!-- Right side controls -->
+                <div class="flex items-center gap-2">
+                    <!-- Desktop nav (hidden on small screens) -->
+                    <nav class="hidden sm:flex items-center gap-2 md:gap-4">
+                        <a href="https://games.spellingsuccess.com/level4-sightwords/content/Directions_for_Online_Sight_Word_Matching_Games.pdf"
+                           target="_blank" rel="noopener noreferrer"
+                           class="px-3 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-semibold transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-1">
+                            Directions
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                            </svg>
+                        </a>
+                        <button id="btn-words" onclick="showScreen('selection')"
+                                class="px-3 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-semibold transition-all hover:scale-105 active:scale-95">
+                            Words
+                        </button>
+                    </nav>
+                    <!-- Audio controls (always visible) -->
+                    <div class="relative">
+                        <button id="btn-audio" onclick="toggleVolumeControl()"
+                                class="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 transition-all hover:scale-105 active:scale-95">
+                            <svg id="icon-audio-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"/>
+                            </svg>
+                            <svg id="icon-audio-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
+                            </svg>
+                        </button>
+                        <!-- Volume Control Popup -->
+                        <div id="volume-control" class="hidden absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl p-4 min-w-[200px] z-50">
+                            <div class="flex items-center gap-3">
+                                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
+                                </svg>
+                                <input type="range" id="volume-slider" min="0" max="100" value="20"
+                                       class="volume-slider flex-1 h-2 bg-blue-400 rounded-full appearance-none cursor-pointer"
+                                       oninput="setVolume(this.value)">
+                                <span id="volume-value" class="text-gray-700 text-sm font-bold min-w-[36px] text-right">20%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hamburger menu button (small screens only) -->
+                    <button onclick="toggleMobileMenu()" class="sm:hidden p-2 rounded-lg hover:bg-gray-100 text-gray-700">
+                        <svg id="hamburger-icon" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                        </svg>
+                        <svg id="hamburger-close-icon" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
-            <nav class="flex items-center gap-2 md:gap-4">
+            <!-- Mobile menu (hidden by default) -->
+            <nav id="mobile-menu" class="hidden sm:hidden mt-3 pt-3 border-t border-gray-200 flex flex-col gap-2">
                 <a href="https://games.spellingsuccess.com/level4-sightwords/content/Directions_for_Online_Sight_Word_Matching_Games.pdf"
                    target="_blank" rel="noopener noreferrer"
-                   class="px-3 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-semibold transition-all hover:scale-105 active:scale-95 inline-flex items-center gap-1">
+                   class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold transition-all">
                     Directions
                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
                     </svg>
                 </a>
-                <button id="btn-words" onclick="showScreen('selection')"
-                        class="px-3 py-1.5 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-sm font-semibold transition-all hover:scale-105 active:scale-95">
+                <button onclick="showScreen('selection'); toggleMobileMenu();"
+                        class="px-4 py-2.5 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold transition-all">
                     Words
                 </button>
-                <div class="relative">
-                    <button id="btn-audio" onclick="toggleVolumeControl()"
-                            class="p-2 rounded-full bg-indigo-100 hover:bg-indigo-200 text-indigo-700 transition-all hover:scale-105 active:scale-95">
-                        <svg id="icon-audio-on" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072M17.95 6.05a8 8 0 010 11.9M11 5L6 9H2v6h4l5 4V5z"/>
-                        </svg>
-                        <svg id="icon-audio-off" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"/>
-                        </svg>
-                    </button>
-                    <!-- Volume Control Popup -->
-                    <div id="volume-control" class="hidden absolute right-0 top-full mt-2 bg-white rounded-xl shadow-2xl p-4 min-w-[200px] z-50">
-                        <div class="flex items-center gap-3">
-                            <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"/>
-                            </svg>
-                            <input type="range" id="volume-slider" min="0" max="100" value="20"
-                                   class="volume-slider flex-1 h-2 bg-blue-400 rounded-full appearance-none cursor-pointer"
-                                   oninput="setVolume(this.value)">
-                            <span id="volume-value" class="text-gray-700 text-sm font-bold min-w-[36px] text-right">20%</span>
-                        </div>
-                    </div>
-                </div>
             </nav>
         </div>
     </header>
@@ -187,7 +219,7 @@
         <div class="flex flex-wrap items-center justify-center gap-4 mb-2">
             <button onclick="clearAllSelections()"
                     id="btn-clear-selection"
-                    class="px-6 py-3 rounded-full bg-red-500/80 hover:bg-red-500 font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
+                    class="px-6 py-3 rounded-full bg-transparent border-2 border-red-500 text-red-400 hover:bg-red-500/10 font-bold text-lg transition-all hover:scale-105 active:scale-95 shadow-lg disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
                     disabled>
                 Clear Selection
             </button>
@@ -287,7 +319,7 @@
         <div class="text-center animate-slide-up z-10">
             <div id="victory-message" class="animate-grow-text">
                 <h2 class="text-5xl md:text-7xl font-extrabold mb-4 drop-shadow-lg" id="winner-text"></h2>
-                <div class="flex items-center justify-center gap-3 flex-wrap mb-2" id="victory-scores"></div>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 mb-2" id="victory-scores"></div>
             </div>
             <button onclick="playAgain()"
                     class="mt-8 px-10 py-4 rounded-full bg-pink-500 hover:bg-pink-600 font-extrabold text-2xl transition-all hover:scale-110 active:scale-95 shadow-2xl animate-fade-in"
